@@ -30,7 +30,7 @@ public class UserRegisterFragment extends Fragment
     SharedPreferences sharedPreferences;
     private EditText userName, userPhoneNumber;
     private Button buttonRegister;
-    private DatabaseReference userDataBase, employeeAttendance;
+    private DatabaseReference userDataBase;
     public UserRegisterFragment()
     {
         // Required empty public constructor
@@ -62,7 +62,7 @@ public class UserRegisterFragment extends Fragment
     private void registerNumber(String name, String phoneNumber,final SharedPreferences.Editor editor)
     {
         //FireBase registration to be done
-        User userDetails = new User(name, phoneNumber);
+        User userDetails = new User(name, phoneNumber,"Online","No Message");
         userDataBase = FirebaseDatabase.getInstance().getReference(); // Add the reference
         userDataBase.child("Users").child(phoneNumber).setValue(userDetails).addOnSuccessListener(new OnSuccessListener<Void>()
         {
