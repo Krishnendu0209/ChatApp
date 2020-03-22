@@ -1,5 +1,6 @@
 package com.example.chatap.Adapter;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,18 +55,24 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
         holder.userStatus.setText(userListData.getStatus());
         if(userListData.getStatus().equals("Offline"))
         {
-            holder.userStatus.setClickable(false);
+            holder.listElement.setClickable(false);
+            holder.userStatus.setTextColor(Color.parseColor("#D3DCD7"));
+        }
+        else
+        {
+            holder.userStatus.setTextColor(Color.parseColor("#0C9549"));
+            holder.listElement.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View view)
+                {
+                    Toast.makeText(view.getContext(), "click on item: " + userListData.getUserName(), Toast.LENGTH_LONG).show();
+                }
+            });
         }
         holder.lastMessage.setText(userListData.getLastMessage());
 
-        holder.listElement.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                Toast.makeText(view.getContext(), "click on item: " + userListData.getUserName(), Toast.LENGTH_LONG).show();
-            }
-        });
+
     }
     @Override
     public int getItemCount()
