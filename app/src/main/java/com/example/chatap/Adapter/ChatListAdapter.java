@@ -52,6 +52,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
         holder.userName.setText(userListData.getUserName());
         holder.userPhoneNumber.setText(userListData.getUserPhoneNumber());
         holder.userStatus.setText(userListData.getStatus());
+        if(userListData.getStatus().equals("Offline"))
+        {
+            holder.userStatus.setClickable(false);
+        }
         holder.lastMessage.setText(userListData.getLastMessage());
 
         holder.listElement.setOnClickListener(new View.OnClickListener()

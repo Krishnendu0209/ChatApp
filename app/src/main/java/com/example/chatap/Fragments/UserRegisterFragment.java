@@ -59,7 +59,7 @@ public class UserRegisterFragment extends Fragment
         return view;
     }
 
-    private void registerNumber(String name, String phoneNumber,final SharedPreferences.Editor editor)
+    private void registerNumber(String name, final String phoneNumber, final SharedPreferences.Editor editor)
     {
         //FireBase registration to be done
         User userDetails = new User(name, phoneNumber,"Online","No Message");
@@ -70,6 +70,7 @@ public class UserRegisterFragment extends Fragment
             {
                 Toast.makeText(getContext(), "Registration Successful", Toast.LENGTH_SHORT).show();
                 editor.putBoolean("Registered User", true);
+                editor.putString("User Phone Number",phoneNumber);
                 editor.commit();
                 getFragmentManager().beginTransaction().replace(R.id.fragment_placeholder, UserListFragment.newInstance()) // opening the login fragment
                         .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
