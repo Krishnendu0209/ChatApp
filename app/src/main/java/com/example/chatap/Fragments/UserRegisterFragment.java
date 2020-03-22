@@ -1,6 +1,7 @@
 package com.example.chatap.Fragments;
 
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -20,9 +21,13 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.Objects;
+
+import static android.content.Context.MODE_PRIVATE;
+
 public class UserRegisterFragment extends Fragment
 {
-
+    SharedPreferences sharedPreferences;
     private EditText userName, userPhoneNumber;
     private Button buttonRegister;
     private DatabaseReference userDataBase, employeeAttendance;
@@ -42,28 +47,33 @@ public class UserRegisterFragment extends Fragment
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_user_register, container, false);
         initViews(view);
+        final SharedPreferences.Editor editor = sharedPreferences.edit();
         buttonRegister.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                registerNumber(userName.getText().toString(),userPhoneNumber.getText().toString());
+                registerNumber(userName.getText().toString(),userPhoneNumber.getText().toString(),editor);
             }
         });
         return view;
     }
 
-    private void registerNumber(String name, String phoneNumber)
+    private void registerNumber(String name, String phoneNumber,final SharedPreferences.Editor editor)
     {
-        //FireBase register to be done
+        //FireBase registration to be done
         User userDetails = new User(name, phoneNumber);
         userDataBase = FirebaseDatabase.getInstance().getReference(); // Add the reference
         userDataBase.child("Users").child(phoneNumber).setValue(userDetails).addOnSuccessListener(new OnSuccessListener<Void>()
         {
             public void onSuccess(Void aVoid) // If the task is successful i. e registration successful
             {
-                //employeeAttendance.child("Employee Attendance").child(employeeCode).setValue(true);
                 Toast.makeText(getContext(), "Registration Successful", Toast.LENGTH_SHORT).show();
+                editor.putBoolean("Registered User", true);
+                editor.commit();
+                getFragmentManager().beginTransaction().replace(R.id.fragment_placeholder, UserListFragment.newInstance()) // opening the login fragment
+                        .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
+                        .addToBackStack("register").commit();
             }
         }).addOnFailureListener(new OnFailureListener() // If after the task fails after initiation then either connectivity issue or FireBase down or node not found
         {
@@ -79,5 +89,6 @@ public class UserRegisterFragment extends Fragment
         userName = view.findViewById(R.id.userName);
         userPhoneNumber = view.findViewById(R.id.userPhoneNumber);
         buttonRegister = view.findViewById(R.id.buttonRegister);
+        sharedPreferences = Objects.requireNonNull(getActivity()).getSharedPreferences("User Registration Status", MODE_PRIVATE);
     }
 }
