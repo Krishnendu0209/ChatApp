@@ -17,8 +17,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chatap.Adapter.ChatListAdapter;
+import com.example.chatap.MainActivity;
 import com.example.chatap.Model.User;
 import com.example.chatap.R;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -40,6 +43,7 @@ public class UserListFragment extends Fragment
     private ArrayList<User> usersList = new ArrayList<>();
     private ProgressBar progressBar;
     private String userPhoneNumber;
+    MainActivity mainActivity;
     public UserListFragment()
     {
         // Required empty public constructor
@@ -66,6 +70,7 @@ public class UserListFragment extends Fragment
         progressBar = view.findViewById(R.id.progress);
         final SharedPreferences sharedPreferences = getContext().getSharedPreferences("User Registration Status", MODE_PRIVATE);
         userPhoneNumber = sharedPreferences.getString("User Phone Number","");
+        mainActivity = new MainActivity();
     }
 
     @Override
@@ -92,6 +97,7 @@ public class UserListFragment extends Fragment
                         userObject = userList.getValue(User.class);// Assigning the database data to the model object
                         if(userList.getKey().equals(userPhoneNumber))
                         {
+                            updateUserStatus(userObject, "Online");
                             continue;
                         }
                         usersList.add(userObject);//Will contain the phone number wise details
@@ -120,6 +126,24 @@ public class UserListFragment extends Fragment
             public void onCancelled(@NonNull DatabaseError databaseError)
             {
                 Log.w("FetchUserlist", "Database error : " + databaseError.toException() + " >>>");
+            }
+        });
+    }
+    public void updateUserStatus(User userObject, String status)
+    {
+        User user = new User(userObject.userName, userObject.userPhoneNumber, status, userObject.lastMessage);
+        userDataBase = FirebaseDatabase.getInstance().getReference(); // Add the reference
+        userDataBase.child("Users").child(userPhoneNumber).setValue(user).addOnSuccessListener(new OnSuccessListener<Void>()
+        {
+            public void onSuccess(Void aVoid) // If the task is successful i. e registration successful
+            {
+                Toast.makeText(getContext(), "Status Changed", Toast.LENGTH_SHORT).show(); // If registration fails
+            }
+        }).addOnFailureListener(new OnFailureListener() // If after the task fails after initiation then either connectivity issue or FireBase down or node not found
+        {
+            public void onFailure(@NonNull Exception e)
+            {
+                Toast.makeText(getContext(), "Modification Failed", Toast.LENGTH_SHORT).show(); // If registration fails
             }
         });
     }

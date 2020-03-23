@@ -3,6 +3,7 @@ package com.example.chatap;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -36,10 +37,10 @@ public class MainActivity extends AppCompatActivity
         openFragment(sharedPreferences);
     }
     @Override
-    protected void onPause()
+    public void onPause()
     {
-        updateUserStatus("Offline");
         checkerFlag = 1;
+        updateUserStatus("Offline");
         super.onPause();
     }
     public void onResume()
@@ -63,6 +64,7 @@ public class MainActivity extends AppCompatActivity
     {
         if(getSupportFragmentManager().getBackStackEntryCount() == 0)
         {
+            updateUserStatus("Offline");
             exitApp();
         }
         else
@@ -117,7 +119,6 @@ public class MainActivity extends AppCompatActivity
                 }
                 else
                 {
-                    //Employee Code not found
                     Toast.makeText(MainActivity.this, "Number Not Found!", Toast.LENGTH_LONG).show();
                 }
             }
@@ -129,7 +130,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
-    private void updateUserStatus(String status)
+    public void updateUserStatus(String status)
     {
         fetchUserDetails(userPhoneNumber);
         User user = new User(userObject.userName, userObject.userPhoneNumber, status, userObject.lastMessage);
