@@ -74,7 +74,7 @@ public class UserRegisterFragment extends Fragment
                 editor.commit();
                 getFragmentManager().beginTransaction().replace(R.id.fragment_placeholder, UserListFragment.newInstance()) // opening the login fragment
                         .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
-                        .addToBackStack("register").commit();
+                        .commit();
             }
         }).addOnFailureListener(new OnFailureListener() // If after the task fails after initiation then either connectivity issue or FireBase down or node not found
         {

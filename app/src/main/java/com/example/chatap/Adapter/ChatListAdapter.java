@@ -1,5 +1,6 @@
 package com.example.chatap.Adapter;
 
+import android.app.Activity;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,8 +9,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.chatap.Fragments.ChatFragment;
 import com.example.chatap.Model.User;
 import com.example.chatap.R;
 
@@ -66,7 +72,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
                 @Override
                 public void onClick(View view)
                 {
-                    Toast.makeText(view.getContext(), "click on item: " + userListData.getUserName(), Toast.LENGTH_LONG).show();
+                    AppCompatActivity activity = (AppCompatActivity) view.getContext();
+                    activity.getSupportFragmentManager().beginTransaction().replace(R.id.fragment_placeholder, ChatFragment.newInstance(userListData.getUserName(),userListData.getUserPhoneNumber()))
+                            .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
+                            .addToBackStack("register").commit();
                 }
             });
         }

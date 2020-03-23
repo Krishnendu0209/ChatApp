@@ -1,6 +1,7 @@
 package com.example.chatap.Fragments;
 
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,6 +27,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
+import static android.content.Context.MODE_PRIVATE;
+
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -36,6 +39,7 @@ public class UserListFragment extends Fragment
     private User userObject;
     private ArrayList<User> usersList = new ArrayList<>();
     private ProgressBar progressBar;
+    private String userPhoneNumber;
     public UserListFragment()
     {
         // Required empty public constructor
@@ -60,6 +64,15 @@ public class UserListFragment extends Fragment
     {
         userListView = view.findViewById(R.id.userList);
         progressBar = view.findViewById(R.id.progress);
+        final SharedPreferences sharedPreferences = getContext().getSharedPreferences("User Registration Status", MODE_PRIVATE);
+        userPhoneNumber = sharedPreferences.getString("User Phone Number","");
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        usersList.clear();
         fetchUserDetails();
     }
 
@@ -77,6 +90,10 @@ public class UserListFragment extends Fragment
                     for(DataSnapshot userList : dataSnapshot.getChildren())
                     {
                         userObject = userList.getValue(User.class);// Assigning the database data to the model object
+                        if(userList.getKey().equals(userPhoneNumber))
+                        {
+                            continue;
+                        }
                         usersList.add(userObject);//Will contain the phone number wise details
                     }
                 } catch(Exception e)

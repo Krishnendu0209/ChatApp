@@ -58,6 +58,24 @@ public class MainActivity extends AppCompatActivity
         super.onStop();
     }
 
+    @Override
+    public void onBackPressed()
+    {
+        if(getSupportFragmentManager().getBackStackEntryCount() == 0)
+        {
+            exitApp();
+        }
+        else
+        {
+            super.onBackPressed();
+        }
+    }
+    private void exitApp()
+    {
+        moveTaskToBack(true);
+        android.os.Process.killProcess(android.os.Process.myPid());
+        System.exit(1);
+    }
     private void openFragment(SharedPreferences sharedPreferences)
     {
         if(!sharedPreferences.getBoolean("Registered User", false)) //User not registered hence initial registration required
@@ -70,7 +88,7 @@ public class MainActivity extends AppCompatActivity
         {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_placeholder, UserListFragment.newInstance()) // opening the login fragment
                     .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
-                    .addToBackStack("register").commit();
+                    .commit();
         }
     }
     private void fetchUserDetails(final String userPhoneNumber) // Function is responsible for fetching details corresponding to employee code form FireBase
