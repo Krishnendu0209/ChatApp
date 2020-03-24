@@ -18,13 +18,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.chatap.Adapter.ChatListAdapter;
 import com.example.chatap.Model.User;
-import com.example.chatap.Model.UserDetails;
 import com.example.chatap.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -40,9 +35,6 @@ import java.util.Map;
 
 import static android.content.Context.MODE_PRIVATE;
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class ChatFragment extends Fragment
 {
     private LinearLayout layout;
@@ -56,6 +48,8 @@ public class ChatFragment extends Fragment
     private static final String CHAT_USER_NUMBER = "chat_user_number";
     private DatabaseReference userDataBase;
     private User userObject;
+    private int checkerFlag = 0;
+
     public ChatFragment()
     {
         // Required empty public constructor
@@ -83,40 +77,43 @@ public class ChatFragment extends Fragment
             @Override
             public void onClick(View v)
             {
-                sendMessage();
+                fetchUserDetails("NA",2);
             }
         });
 
-        reference1.addChildEventListener(new ChildEventListener() {
+        reference1.addChildEventListener(new ChildEventListener()
+        {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, String s)
+            {
                 Map<String, Object> map = (Map<String, Object>) dataSnapshot.getValue();
                 String message = map.get("message").toString();
                 String userName = map.get("user").toString();
 
-                if(userName.equals(userPhoneNumber)){
-                    addMessageBox("You:-\n" + message, 1);
+                if(userName.equals(userPhoneNumber))
+                {
+                    addMessageBox("You :\n" + " " + message, 1);
                 }
-                else{
-                    addMessageBox(chatWithUserName + ":-\n" + message, 2);
+                else
+                {
+                    addMessageBox(chatWithUserName + " :\n" + " " + message, 2);
                 }
             }
-
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            public void onChildChanged(DataSnapshot dataSnapshot, String s)
+            {
 
             }
-
             @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            public void onChildRemoved(DataSnapshot dataSnapshot)
+            {
 
             }
-
             @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            public void onChildMoved(DataSnapshot dataSnapshot, String s)
+            {
 
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError)
             {
@@ -126,6 +123,12 @@ public class ChatFragment extends Fragment
         return view;
     }
 
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        fetchUserDetails("Online",1);
+    }
     private void initViews(View view)
     {
         layout = view.findViewById(R.id.layout1);
@@ -134,7 +137,7 @@ public class ChatFragment extends Fragment
         messageArea = view.findViewById(R.id.messageArea);
         scrollView = view.findViewById(R.id.scrollView);
         final SharedPreferences sharedPreferences = getContext().getSharedPreferences("User Registration Status", MODE_PRIVATE);
-        userPhoneNumber = sharedPreferences.getString("User Phone Number","");
+        userPhoneNumber = sharedPreferences.getString("User Phone Number", "");
 
         if(getArguments() != null)
         {
@@ -144,6 +147,7 @@ public class ChatFragment extends Fragment
         reference1 = FirebaseDatabase.getInstance().getReference().child("Messages").child(userPhoneNumber + "_" + chatWithUserNumber);
         reference2 = FirebaseDatabase.getInstance().getReference().child("Messages").child(chatWithUserNumber + "_" + userPhoneNumber);
     }
+
     private void addMessageBox(String message, int type)
     {
         TextView textView;
@@ -170,22 +174,26 @@ public class ChatFragment extends Fragment
             scrollView.fullScroll(View.FOCUS_DOWN);
         }
     }
+
     private void sendMessage()
     {
         String messageText = messageArea.getText().toString();
-        if(!messageText.equals(""))
+        if(!messageText.equals("") && userObject.status.equals("Online"))
         {
             Map<String, String> map = new HashMap<String, String>();
-
             map.put("message", messageText);
             map.put("user", userPhoneNumber);
             reference1.push().setValue(map);
             reference2.push().setValue(map);
             messageArea.setText("");
-            fetchUserDetails(messageText);
+        }
+        else
+        {
+            Toast.makeText(getContext(),"Enter Text",Toast.LENGTH_LONG).show();
         }
     }
-    private void fetchUserDetails(final String messageText)
+
+    private void fetchUserDetails(final String userStatus, final int choice)
     {
         userDataBase = FirebaseDatabase.getInstance().getReference()
                 .child("Users");
@@ -198,51 +206,91 @@ public class ChatFragment extends Fragment
                 {
                     for(DataSnapshot userList : dataSnapshot.getChildren())
                     {
-                        if(userList.getKey().equals(userPhoneNumber))
+                        if(choice == 1) // for making the main user user status as online or fofline
                         {
-                            userObject = userList.getValue(User.class);// Assigning the database data to the model object
-                            updateUserStatus(userObject, messageText);
+                            if(userList.getKey().equals(userPhoneNumber))
+                            {
+                                userObject = userList.getValue(User.class);// Assigning the database data to the model object
+                                if(userStatus.equals("Online"))
+                                {
+                                    updateUserStatus(userObject, "Online"); //Update user status to online
+                                }
+                                else
+                                {
+                                    updateUserStatus(userObject, "Offline"); //Update user status as offline
+                                }
+                            }
+                            else
+                            {
+                                continue;
+                            }
                         }
-                        else if(userList.getKey().equals(chatWithUserNumber))
+                        else //for checking if the chatting user is online or not
                         {
-                            userObject = userList.getValue(User.class);// Assigning the database data to the model object
-                            updateUserStatus(userObject, messageText);
+                            if(userList.getKey().equals(chatWithUserNumber))
+                            {
+                                userObject = userList.getValue(User.class);// Assigning the database data to the model object
+                                if(userObject.status.equals("Online")) //User is online on other side hence message can be sent
+                                {
+                                    sendMessage();
+                                }
+                                else //User is offline
+                                {
+                                    Toast.makeText(getContext(),"User Is Offline",Toast.LENGTH_LONG).show();
+                                }
+                            }
+                            else
+                            {
+                                continue;
+                            }
                         }
-                        else
-                        {
-                            continue;
-                        }
+
                     }
                 } catch(Exception e)
                 {
-                    Log.e("FetchUserlist", "Data interchange failed. Exception: <<< " + e.getMessage() + " >>>.");
+                    Log.e("FetchUserDetails", "Data interchange failed. Exception: <<< " + e.getMessage() + " >>>.");
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError)
             {
-                Log.w("FetchUserlist", "Database error : " + databaseError.toException() + " >>>");
+                Log.w("FetchUserDetailsFailed", "Database error : " + databaseError.toException() + " >>>");
             }
         });
     }
-    private void updateUserStatus(User userObject, String lastMessage)
+
+    private void updateUserStatus(User userObject, String status)
     {
-        User user = new User(userObject.userName, userObject.userPhoneNumber, userObject.status, lastMessage);
+        User user = new User(userObject.userName, userObject.userPhoneNumber, status, "No Message");
         userDataBase = FirebaseDatabase.getInstance().getReference(); // Add the reference
         userDataBase.child("Users").child(userObject.userPhoneNumber).setValue(user).addOnSuccessListener(new OnSuccessListener<Void>()
         {
             public void onSuccess(Void aVoid) // If the task is successful i. e registration successful
             {
-                Toast.makeText(getContext(), "Last Message", Toast.LENGTH_SHORT).show(); // If registration fails
+                //Toast.makeText(getActivity(), "Status Updated", Toast.LENGTH_SHORT).show(); // Updating Last message
             }
         }).addOnFailureListener(new OnFailureListener() // If after the task fails after initiation then either connectivity issue or FireBase down or node not found
         {
             public void onFailure(@NonNull Exception e)
             {
-                Toast.makeText(getContext(), "Modification Failed", Toast.LENGTH_SHORT).show(); // If registration fails
+                //Toast.makeText(getContext(), "Modification Failed", Toast.LENGTH_SHORT).show(); // Last message not updated
             }
         });
     }
+    @Override
+    public void onPause()
+    {
+        checkerFlag = 1;
+        fetchUserDetails("Offline",1);
+        super.onPause();
+    }
 
+    @Override
+    public void onStop()
+    {
+        checkerFlag = 1;
+        fetchUserDetails("Offline",1);
+        super.onStop();
+    }
 }

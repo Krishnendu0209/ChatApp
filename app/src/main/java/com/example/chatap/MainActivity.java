@@ -64,8 +64,8 @@ public class MainActivity extends AppCompatActivity
     {
         if(getSupportFragmentManager().getBackStackEntryCount() == 0)
         {
+            checkerFlag = 3; //Only when app is getting exited
             updateUserStatus("Offline");
-            exitApp();
         }
         else
         {
@@ -82,13 +82,13 @@ public class MainActivity extends AppCompatActivity
     {
         if(!sharedPreferences.getBoolean("Registered User", false)) //User not registered hence initial registration required
         {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_placeholder, UserRegisterFragment.newInstance()) // opening the login fragment
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_placeholder, UserRegisterFragment.newInstance()) // opening the user registration fragment
                     .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
                     .addToBackStack("register").commit();
         }
         else  //Initial registration not required hence display list of users
         {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_placeholder, UserListFragment.newInstance()) // opening the login fragment
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_placeholder, UserListFragment.newInstance()) // opening the user listing fragment
                     .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
                     .commit();
         }
@@ -126,28 +126,36 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError)
             {
-                Log.w("fetDisEmpAttenData", "Database error : " + databaseError.toException() + " >>>");
+                Log.w("UserDetailsFetchFailed", "Database error : " + databaseError.toException() + " >>>");
             }
         });
     }
     public void updateUserStatus(String status)
     {
         fetchUserDetails(userPhoneNumber);
-        User user = new User(userObject.userName, userObject.userPhoneNumber, status, userObject.lastMessage);
-        userDataBase = FirebaseDatabase.getInstance().getReference(); // Add the reference
-        userDataBase.child("Users").child(userPhoneNumber).setValue(user).addOnSuccessListener(new OnSuccessListener<Void>()
-        {
-            public void onSuccess(Void aVoid) // If the task is successful i. e registration successful
-            {
-                Toast.makeText(MainActivity.this, "Status Changed", Toast.LENGTH_SHORT).show(); // If registration fails
-            }
-        }).addOnFailureListener(new OnFailureListener() // If after the task fails after initiation then either connectivity issue or FireBase down or node not found
-        {
-            public void onFailure(@NonNull Exception e)
-            {
-                Toast.makeText(MainActivity.this, "Modification Failed", Toast.LENGTH_SHORT).show(); // If registration fails
-            }
-        });
-    }
 
+        if(userObject != null)
+        {
+            User user = new User(userObject.userName, userObject.userPhoneNumber, status, userObject.lastMessage);
+            userDataBase = FirebaseDatabase.getInstance().getReference(); // Add the reference
+            userDataBase.child("Users").child(userPhoneNumber).setValue(user).addOnSuccessListener(new OnSuccessListener<Void>()
+            {
+                public void onSuccess(Void aVoid) // If the task is successful i. e registration successful
+                {
+                    //Status of user gets changed
+                    if(checkerFlag ==3)
+                    {
+                        exitApp();
+                    }
+                    //Toast.makeText(MainActivity.this, "Status Updated", Toast.LENGTH_SHORT).show(); // If registration fails
+                }
+            }).addOnFailureListener(new OnFailureListener() // If after the task fails after initiation then either connectivity issue or FireBase down or node not found
+            {
+                public void onFailure(@NonNull Exception e)
+                {
+                    Toast.makeText(MainActivity.this, " Status modification Failed", Toast.LENGTH_SHORT).show(); // If registration fails
+                }
+            });
+        }
+    }
 }

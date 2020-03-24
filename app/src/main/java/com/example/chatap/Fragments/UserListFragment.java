@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -32,9 +33,7 @@ import java.util.ArrayList;
 
 import static android.content.Context.MODE_PRIVATE;
 
-/**
- * A simple {@link Fragment} subclass.
- */
+
 public class UserListFragment extends Fragment
 {
     private RecyclerView userListView;
@@ -43,7 +42,10 @@ public class UserListFragment extends Fragment
     private ArrayList<User> usersList = new ArrayList<>();
     private ProgressBar progressBar;
     private String userPhoneNumber;
-    MainActivity mainActivity;
+    private MainActivity mainActivity;
+    private Button buttonRefresh;
+    private int checkerFlag = 0;
+
     public UserListFragment()
     {
         // Required empty public constructor
@@ -61,6 +63,16 @@ public class UserListFragment extends Fragment
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_user_list, container, false);
         initViews(view);
+        buttonRefresh.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                progressBar.setVisibility(View.VISIBLE);
+                usersList.clear();
+                fetchUserDetails("Online");
+            }
+        });
         return view;
     }
 
@@ -68,6 +80,7 @@ public class UserListFragment extends Fragment
     {
         userListView = view.findViewById(R.id.userList);
         progressBar = view.findViewById(R.id.progress);
+        buttonRefresh = view.findViewById(R.id.buttonRefresh);
         final SharedPreferences sharedPreferences = getContext().getSharedPreferences("User Registration Status", MODE_PRIVATE);
         userPhoneNumber = sharedPreferences.getString("User Phone Number","");
         mainActivity = new MainActivity();
@@ -78,10 +91,10 @@ public class UserListFragment extends Fragment
     {
         super.onResume();
         usersList.clear();
-        fetchUserDetails();
+        fetchUserDetails("Online");
     }
 
-    private void fetchUserDetails()
+    public void fetchUserDetails(final String status)
     {
         userDataBase = FirebaseDatabase.getInstance().getReference()
                 .child("Users");
@@ -97,8 +110,15 @@ public class UserListFragment extends Fragment
                         userObject = userList.getValue(User.class);// Assigning the database data to the model object
                         if(userList.getKey().equals(userPhoneNumber))
                         {
-                            updateUserStatus(userObject, "Online");
-                            continue;
+                            if(status.equals("Online"))
+                            {
+                                updateUserStatus(userObject, "Online");
+                            }
+                            else
+                            {
+                                updateUserStatus(userObject, "Offline");
+                            }
+                            continue;//This is done so that the logged in user does not see itself in the users list
                         }
                         usersList.add(userObject);//Will contain the phone number wise details
                     }
@@ -137,14 +157,31 @@ public class UserListFragment extends Fragment
         {
             public void onSuccess(Void aVoid) // If the task is successful i. e registration successful
             {
-                Toast.makeText(getContext(), "Status Changed", Toast.LENGTH_SHORT).show(); // If registration fails
+                //Status successfully updated
+                //Toast.makeText(getContext(), "Status Changed", Toast.LENGTH_SHORT).show(); // User Status Changed
             }
         }).addOnFailureListener(new OnFailureListener() // If after the task fails after initiation then either connectivity issue or FireBase down or node not found
         {
             public void onFailure(@NonNull Exception e)
             {
-                Toast.makeText(getContext(), "Modification Failed", Toast.LENGTH_SHORT).show(); // If registration fails
+                Toast.makeText(getContext(), "Modification Failed", Toast.LENGTH_SHORT).show(); // User Status failed to change
             }
         });
+    }
+
+    @Override
+    public void onPause()
+    {
+        checkerFlag = 1;
+        fetchUserDetails("Offline");
+        super.onPause();
+    }
+
+    @Override
+    public void onStop()
+    {
+        checkerFlag = 1;
+        fetchUserDetails("Offline");
+        super.onStop();
     }
 }

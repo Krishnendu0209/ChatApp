@@ -53,7 +53,25 @@ public class UserRegisterFragment extends Fragment
             @Override
             public void onClick(View v)
             {
-                registerNumber(userName.getText().toString(),userPhoneNumber.getText().toString(),editor);
+                if(!userName.getText().toString().equals("") && !userPhoneNumber.getText().toString().equals(""))
+                {
+                    if(userPhoneNumber.getText().toString().length() == 10)
+                    {
+                        registerNumber(userName.getText().toString(),userPhoneNumber.getText().toString(),editor);
+                    }
+                    else
+                    {
+                        Toast.makeText(getContext(), "10 digit number", Toast.LENGTH_SHORT).show(); // User Status Changed
+                    }
+                }
+                else if(userName.getText().toString().equals(""))
+                {
+                    Toast.makeText(getContext(), "Enter UserName", Toast.LENGTH_SHORT).show(); // User Status Changed
+                }
+                else if(userPhoneNumber.getText().toString().equals(""))
+                {
+                    Toast.makeText(getContext(), "Enter Phone Number", Toast.LENGTH_SHORT).show(); // User Status Changed
+                }
             }
         });
         return view;
@@ -72,7 +90,7 @@ public class UserRegisterFragment extends Fragment
                 editor.putBoolean("Registered User", true);
                 editor.putString("User Phone Number",phoneNumber);
                 editor.commit();
-                getFragmentManager().beginTransaction().replace(R.id.fragment_placeholder, UserListFragment.newInstance()) // opening the login fragment
+                getFragmentManager().beginTransaction().replace(R.id.fragment_placeholder, UserListFragment.newInstance()) // opening the registration fragment
                         .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
                         .commit();
             }
