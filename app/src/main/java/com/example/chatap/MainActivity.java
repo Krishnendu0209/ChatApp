@@ -64,8 +64,8 @@ public class MainActivity extends AppCompatActivity
     {
         if(getSupportFragmentManager().getBackStackEntryCount() == 0)
         {
+            checkerFlag = 3; //Only when app is getting exited
             updateUserStatus("Offline");
-            exitApp();
         }
         else
         {
@@ -143,7 +143,11 @@ public class MainActivity extends AppCompatActivity
                 public void onSuccess(Void aVoid) // If the task is successful i. e registration successful
                 {
                     //Status of user gets changed
-                    Toast.makeText(MainActivity.this, "Status Updated", Toast.LENGTH_SHORT).show(); // If registration fails
+                    if(checkerFlag ==3)
+                    {
+                        exitApp();
+                    }
+                    //Toast.makeText(MainActivity.this, "Status Updated", Toast.LENGTH_SHORT).show(); // If registration fails
                 }
             }).addOnFailureListener(new OnFailureListener() // If after the task fails after initiation then either connectivity issue or FireBase down or node not found
             {

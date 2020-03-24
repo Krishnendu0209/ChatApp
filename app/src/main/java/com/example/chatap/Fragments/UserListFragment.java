@@ -44,6 +44,8 @@ public class UserListFragment extends Fragment
     private String userPhoneNumber;
     private MainActivity mainActivity;
     private Button buttonRefresh;
+    private int checkerFlag = 0;
+
     public UserListFragment()
     {
         // Required empty public constructor
@@ -68,7 +70,7 @@ public class UserListFragment extends Fragment
             {
                 progressBar.setVisibility(View.VISIBLE);
                 usersList.clear();
-                fetchUserDetails();
+                fetchUserDetails("Online");
             }
         });
         return view;
@@ -89,10 +91,10 @@ public class UserListFragment extends Fragment
     {
         super.onResume();
         usersList.clear();
-        fetchUserDetails();
+        fetchUserDetails("Online");
     }
 
-    public void fetchUserDetails()
+    public void fetchUserDetails(final String status)
     {
         userDataBase = FirebaseDatabase.getInstance().getReference()
                 .child("Users");
@@ -108,8 +110,15 @@ public class UserListFragment extends Fragment
                         userObject = userList.getValue(User.class);// Assigning the database data to the model object
                         if(userList.getKey().equals(userPhoneNumber))
                         {
-                            updateUserStatus(userObject, "Online");
-                            continue;
+                            if(status.equals("Online"))
+                            {
+                                updateUserStatus(userObject, "Online");
+                            }
+                            else
+                            {
+                                updateUserStatus(userObject, "Offline");
+                            }
+                            continue;//This is done so that the logged in user does not see itself in the users list
                         }
                         usersList.add(userObject);//Will contain the phone number wise details
                     }
@@ -148,7 +157,8 @@ public class UserListFragment extends Fragment
         {
             public void onSuccess(Void aVoid) // If the task is successful i. e registration successful
             {
-                Toast.makeText(getContext(), "Status Changed", Toast.LENGTH_SHORT).show(); // User Status Changed
+                //Status successfully updated
+                //Toast.makeText(getContext(), "Status Changed", Toast.LENGTH_SHORT).show(); // User Status Changed
             }
         }).addOnFailureListener(new OnFailureListener() // If after the task fails after initiation then either connectivity issue or FireBase down or node not found
         {
@@ -157,5 +167,21 @@ public class UserListFragment extends Fragment
                 Toast.makeText(getContext(), "Modification Failed", Toast.LENGTH_SHORT).show(); // User Status failed to change
             }
         });
+    }
+
+    @Override
+    public void onPause()
+    {
+        checkerFlag = 1;
+        fetchUserDetails("Offline");
+        super.onPause();
+    }
+
+    @Override
+    public void onStop()
+    {
+        checkerFlag = 1;
+        fetchUserDetails("Offline");
+        super.onStop();
     }
 }
