@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -45,6 +46,7 @@ public class UserListFragment extends Fragment
     private MainActivity mainActivity;
     private Button buttonRefresh;
     private int checkerFlag = 0;
+    private TextView textViewNoUsers;
 
     public UserListFragment()
     {
@@ -70,6 +72,7 @@ public class UserListFragment extends Fragment
             {
                 progressBar.setVisibility(View.VISIBLE);
                 usersList.clear();
+                buttonRefresh.setVisibility(View.INVISIBLE);
                 fetchUserDetails("Online");
             }
         });
@@ -81,6 +84,7 @@ public class UserListFragment extends Fragment
         userListView = view.findViewById(R.id.userList);
         progressBar = view.findViewById(R.id.progress);
         buttonRefresh = view.findViewById(R.id.buttonRefresh);
+        textViewNoUsers = view.findViewById(R.id.textViewNoUsers);
         final SharedPreferences sharedPreferences = getContext().getSharedPreferences("User Registration Status", MODE_PRIVATE);
         userPhoneNumber = sharedPreferences.getString("User Phone Number","");
         mainActivity = new MainActivity();
@@ -128,6 +132,7 @@ public class UserListFragment extends Fragment
                 }
                 if(!usersList.isEmpty())
                 {
+                    textViewNoUsers.setVisibility(View.GONE);
                     ChatListAdapter chatListAdapter = new ChatListAdapter(usersList);
                     RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
                     userListView.setLayoutManager(mLayoutManager);
@@ -135,6 +140,12 @@ public class UserListFragment extends Fragment
                     userListView.setAdapter(chatListAdapter);
                     chatListAdapter.notifyDataSetChanged();
                     progressBar.setVisibility(View.GONE);
+                    buttonRefresh.setVisibility(View.VISIBLE);
+                }
+                else if(usersList.isEmpty())
+                {
+                    progressBar.setVisibility(View.GONE);
+                    textViewNoUsers.setVisibility(View.VISIBLE);
                 }
                 else
                 {

@@ -22,7 +22,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
     </ScrollView>
-
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textStyle="italic"
+        android:textSize="30dp"
+        android:id="@+id/textViewNoUsers"
+        android:gravity="center"
+        android:text="No Users Yet!"
+        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"/>
     <Button
         android:id="@+id/buttonRefresh"
         android:layout_width="100dp"
