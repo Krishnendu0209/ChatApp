@@ -146,6 +146,7 @@ public class ChatFragment extends Fragment
         }
         reference1 = FirebaseDatabase.getInstance().getReference().child("Messages").child(userPhoneNumber + "_" + chatWithUserNumber);
         reference2 = FirebaseDatabase.getInstance().getReference().child("Messages").child(chatWithUserNumber + "_" + userPhoneNumber);
+        messageArea.setEnabled(true);
     }
 
     private void addMessageBox(String message, int type)
@@ -236,6 +237,7 @@ public class ChatFragment extends Fragment
                                 }
                                 else //User is offline
                                 {
+                                    messageArea.setEnabled(false);
                                     Toast.makeText(getContext(),"User Is Offline",Toast.LENGTH_LONG).show();
                                 }
                             }
