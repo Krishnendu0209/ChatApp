@@ -65,7 +65,14 @@ public class MainActivity extends AppCompatActivity
         if(getSupportFragmentManager().getBackStackEntryCount() == 0)
         {
             checkerFlag = 3; //Only when app is getting exited
-            updateUserStatus("Offline");
+            if(!userPhoneNumber.equals(""))
+            {
+                updateUserStatus("Offline");
+            }
+            else
+            {
+                exitApp();
+            }
         }
         else
         {
@@ -84,7 +91,7 @@ public class MainActivity extends AppCompatActivity
         {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_placeholder, UserRegisterFragment.newInstance()) // opening the user registration fragment
                     .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
-                    .addToBackStack("register").commit();
+                    .commit();
         }
         else  //Initial registration not required hence display list of users
         {
