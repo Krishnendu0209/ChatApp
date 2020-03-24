@@ -32,9 +32,7 @@ import java.util.ArrayList;
 
 import static android.content.Context.MODE_PRIVATE;
 
-/**
- * A simple {@link Fragment} subclass.
- */
+
 public class UserListFragment extends Fragment
 {
     private RecyclerView userListView;
@@ -137,13 +135,13 @@ public class UserListFragment extends Fragment
         {
             public void onSuccess(Void aVoid) // If the task is successful i. e registration successful
             {
-                Toast.makeText(getContext(), "Status Changed", Toast.LENGTH_SHORT).show(); // If registration fails
+                Toast.makeText(getContext(), "Status Changed", Toast.LENGTH_SHORT).show(); // User Status Changed
             }
         }).addOnFailureListener(new OnFailureListener() // If after the task fails after initiation then either connectivity issue or FireBase down or node not found
         {
             public void onFailure(@NonNull Exception e)
             {
-                Toast.makeText(getContext(), "Modification Failed", Toast.LENGTH_SHORT).show(); // If registration fails
+                Toast.makeText(getContext(), "Modification Failed", Toast.LENGTH_SHORT).show(); // User Status failed to change
             }
         });
     }

@@ -72,7 +72,7 @@ public class UserRegisterFragment extends Fragment
                 editor.putBoolean("Registered User", true);
                 editor.putString("User Phone Number",phoneNumber);
                 editor.commit();
-                getFragmentManager().beginTransaction().replace(R.id.fragment_placeholder, UserListFragment.newInstance()) // opening the login fragment
+                getFragmentManager().beginTransaction().replace(R.id.fragment_placeholder, UserListFragment.newInstance()) // opening the registration fragment
                         .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
                         .commit();
             }
