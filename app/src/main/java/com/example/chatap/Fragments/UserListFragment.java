@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -41,7 +42,8 @@ public class UserListFragment extends Fragment
     private ArrayList<User> usersList = new ArrayList<>();
     private ProgressBar progressBar;
     private String userPhoneNumber;
-    MainActivity mainActivity;
+    private MainActivity mainActivity;
+    private Button buttonRefresh;
     public UserListFragment()
     {
         // Required empty public constructor
@@ -59,6 +61,16 @@ public class UserListFragment extends Fragment
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_user_list, container, false);
         initViews(view);
+        buttonRefresh.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                progressBar.setVisibility(View.VISIBLE);
+                usersList.clear();
+                fetchUserDetails();
+            }
+        });
         return view;
     }
 
@@ -66,6 +78,7 @@ public class UserListFragment extends Fragment
     {
         userListView = view.findViewById(R.id.userList);
         progressBar = view.findViewById(R.id.progress);
+        buttonRefresh = view.findViewById(R.id.buttonRefresh);
         final SharedPreferences sharedPreferences = getContext().getSharedPreferences("User Registration Status", MODE_PRIVATE);
         userPhoneNumber = sharedPreferences.getString("User Phone Number","");
         mainActivity = new MainActivity();
@@ -79,7 +92,7 @@ public class UserListFragment extends Fragment
         fetchUserDetails();
     }
 
-    private void fetchUserDetails()
+    public void fetchUserDetails()
     {
         userDataBase = FirebaseDatabase.getInstance().getReference()
                 .child("Users");
